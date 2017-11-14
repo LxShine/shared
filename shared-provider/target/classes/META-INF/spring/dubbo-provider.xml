@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd
+	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<context:annotation-config />
+
+	<!-- 提供配置文件位置 -->
+	<context:property-placeholder location="${confpath}/*.properties"/>
+	
+    <import resource="classpath:META-INF/spring/spring-config-db.xml"/>
+    <!-- <import resource="classpath:META-INF/spring/spring-context-jedis.xml"/> -->
+	
+	
+	<!-- 提供方应用名称信息，这个相当于起一个名字，我们dubbo管理页面比较清晰是哪个应用暴露出来的 -->
+   	<dubbo:application name="${dubbo.application.name}"></dubbo:application>
+   	<dubbo:protocol id="dubbo" name="dubbo" port="${dubbo.protocol.port}" host="${${dubbo.protocol.host}}" />
+   	<dubbo:provider protocol="dubbo" delay="-1" timeout="${dubbo.protocol.timeout}" retries="0" />
+   	
+   	<!-- 使用zookeeper注册中心暴露服务地址 -->  
+  	<dubbo:registry address="${${dubbo.registry.address}}" check="false" subscribe="false" group="${${dubbo.registry.group}}"></dubbo:registry>
+  	
+  	<!-- 监控中心 -->
+  <!-- 	<dubbo:monitor protocol="registry" address=""/> -->
+  	
+	<!-- 要暴露的服务接口 -->
+	<!-- <dubbo:service interface="com.jifenzhi.nreport.core.service.IntegralRecordService" ref="integralRecordService" protocol="dubbo" /> -->
+	<!-- <dubbo:service interface="com.jifenzhi.nreport.core.service.NReportService" ref="nreportService"  protocol="dubbo" />
+	<dubbo:service interface="com.jifenzhi.nreport.core.service.RecordService" ref="recordService"  protocol="dubbo" />
+	<dubbo:service interface="com.jifenzhi.nreport.core.service.UserMonthRankService" ref="userMonthRankService"  protocol="dubbo" /> -->
+	
+	<!-- 要暴露的服务接口 -->
+	<!-- <dubbo:service interface="com.jifenzhi.nreport.core.service.NReportService" ref="nreportService" timeout="99000" protocol="dubbo" />
+	<dubbo:service interface="com.jifenzhi.nreport.core.service.UserTaskDayRecordService" ref="userTaskDayRecordService"  protocol="dubbo" />
+	<dubbo:service interface="com.jifenzhi.nreport.core.service.UserMonthRankService" ref="userMonthRankService"  protocol="dubbo" />
+	<dubbo:service interface="com.jifenzhi.nreport.core.service.ACTaskService" ref="aCTaskService"  protocol="dubbo" />
+	<dubbo:service interface="com.jifenzhi.nreport.core.service.UserNormScoreService" ref="userNormScoreService"  protocol="dubbo" /> -->
+	
+
+	<!-- 员工积分Redis接口 -->
+	<!-- <dubbo:service interface="com.jifenzhi.nreport.core.service.RedisDataSortService" ref="redisDataSortService"  protocol="dubbo" />
+	<dubbo:service interface="com.jifenzhi.nreport.core.service.UserTypeScoreService" ref="userTypeScoreService"  protocol="dubbo" /> -->
+	
+</beans>

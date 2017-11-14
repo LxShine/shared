@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- 扫描注解Bean -->
+	<context:component-scan base-package="com.isoftstone.shared" />
+
+	<!-- 开启AOP监听 只对当前配置文件有效 -->
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+
+	<!-- <context:property-placeholder location="${confpath}/mycat.properties"/> -->
+
+	<!-- 配置数据源 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<!-- 基本属性 url、user、password -->
+		<property name="url" value="${${jdbc.url}}" />
+		<property name="username" value="${${jdbc.username}}" />
+		<property name="password" value="${${jdbc.password}}" />
+
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${druid.initialSize}" />
+		<property name="minIdle" value="${druid.minIdle}" />
+		<property name="maxActive" value="${druid.maxActive}" />
+
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${druid.maxWait}" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}" />
+
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}" />
+
+		<property name="validationQuery" value="${druid.validationQuery}" />
+		<property name="testWhileIdle" value="${druid.testWhileIdle}" />
+		<property name="testOnBorrow" value="${druid.testOnBorrow}" />
+		<property name="testOnReturn" value="${druid.testOnReturn}" />
+
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 如果用Oracle，则把poolPreparedStatements配置为true，mysql可以配置为false。 -->
+		<property name="poolPreparedStatements" value="${druid.poolPreparedStatements}" />
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="${druid.maxPoolPreparedStatementPerConnectionSize}" />
+
+		<!-- 配置监控统计拦截的filters -->
+		<property name="filters" value="${druid.filters}" />
+		
+		<!--配置连接过长的连接强制关闭时间  -->
+		<!-- <property name="removeAbandoned" value="${druid.removeAbandoned}" />
+		<property name="removeAbandonedTimeout" value="${druid.removeAbandonedTimeout}" /> -->
+	</bean>
+
+	<!-- mybatis的SqlSession的工厂: SqlSessionFactoryBean dataSource / typeAliasesPackage -->
+	<bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="com.isoftstone.shared.core.model" />
+		<!-- <property name="typeAliasesSuperType" value="com.jifenzhi.core.po.BasePO" 
+			/> -->
+		<property name="mapperLocations" value="classpath:sqlmap/**/*.xml" />
+		<property name="configLocation" value="classpath:META-INF/spring/mybatis-config.xml" />
+	</bean>
+
+	<!-- mybatis自动扫描加载Sql映射文件 : MapperScannerConfigurer sqlSessionFactory / 
+		basePackage通过这样模式则不需要手动添加所有的映射文件 -->
+	<bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.isoftstone.shared.dao" />
+	</bean>
+
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!--配置事务的传播特性 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="insert*" propagation="REQUIRED"
+				rollback-for="Exception" />
+			<tx:method name="save*" propagation="REQUIRED"
+				rollback-for="Exception" />
+			<tx:method name="update*" propagation="REQUIRED"
+				rollback-for="Exception" />
+			<tx:method name="delete*" propagation="REQUIRED"
+				rollback-for="Exception" />
+			<tx:method name="push*" propagation="REQUIRED"
+				rollback-for="Exception" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- 配置哪些类哪些方法使用事务 Spring注入的是接口，关联的是实现类.这里注入了实现类，所以报异常了。 在Spring的配置文件加上下面代码，注明可以用实现类注入 
+		<aop:config proxy-target-class=“true”></aop:config> -->
+	<aop:config>
+		<aop:pointcut id="allManagerMethod"
+			expression="execution(* com.isoftstone.shared.*.service..*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="allManagerMethod" />
+	</aop:config>
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+
+	<!-- redis消息队列 -->
+	<!-- <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxTotal" value="${redis.pool.maxTotal}" />
+		<property name="maxIdle" value="${redis.pool.maxIdle}" />
+		<property name="timeBetweenEvictionRunsMillis" value="${redis.pool.timeBetweenEvictionRunsMillis}" />
+		<property name="minEvictableIdleTimeMillis" value="${redis.pool.minEvictableIdleTimeMillis}" />
+		<property name="softMinEvictableIdleTimeMillis" value="${redis.pool.softMinEvictableIdleTimeMillis}" />
+		<property name="maxWaitMillis" value="${redis.pool.maxWaitMillis}" />
+		<property name="testOnBorrow" value="${redis.pool.testOnBorrow}" />
+		<property name="testWhileIdle" value="${redis.pool.testWhileIdle}" />
+		<property name="testOnReturn" value="${redis.pool.testOnReturn}" />
+		<property name="blockWhenExhausted" value="${redis.pool.blockWhenExhausted}" />
+	</bean> -->
+
+	<!-- <bean id="shardedJedisPool" class="redis.clients.jedis.ShardedJedisPool"
+		scope="singleton">
+		<constructor-arg index="0" ref="jedisPoolConfig" />
+		<constructor-arg index="1">
+			<list>
+				<bean class="com.jifenzhi.mqueue.core.redis.MyJedisShardInfo">
+					<constructor-arg value="${${redis.slaver1.host}}" />
+					<constructor-arg value="${${redis.client.connectionTimeout}}" />
+					<constructor-arg value="${${redis.client.soTimeout}}" />
+				</bean>
+			</list>
+		</constructor-arg>
+	</bean> -->
+
+</beans>

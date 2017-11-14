@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.isoftstone.shared.dao.MemberDao">
+ 	
+ 	<!-- <sql id="intNewAwardCutTaskColumns">
+		a.id AS "id",
+		a.name AS "name",
+		a.award_bscore AS "awardBscore",
+		a.cut_bscore AS "cutBscore",
+		a.cut_scale AS "cutScale",
+		a.award_cut_cycle AS "awardCutCycle",
+		a.award_cut_one_point AS "awardCutOnePoint",
+		a.uncompleted_one_point AS "uncompletedOnePoint",
+		a.one_point_cycle AS "onePointCycle",
+		a.is_double AS "isDouble",
+		a.status AS "status",
+		a.company_id AS "companyId"
+	</sql> -->
+	
+ 	<!-- 奖扣任务 关联人员返回结果集 -->
+	<!-- <resultMap id="awardCutTaskSysEmployeeResult" type="ACTaskDetailVO">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="awardBscore" column="awardBscore" />
+		<result property="cutBscore" column="cutBscore" />
+		<result property="cutScale" column="cutScale" />
+		<result property="awardCutCycle" column="awardCutCycle" />
+		<result property="awardCutOnePoint" column="awardCutOnePoint" />
+		<result property="uncompletedOnePoint" column="uncompletedOnePoint" />
+		<result property="onePointCycle" column="onePointCycle" />
+		<result property="isDouble" column="isDouble" />
+		<result property="status" column="status" />
+		<result property="companyId" column="companyId" />
+		<collection property="employeeIdList" ofType="java.lang.String">
+			<id property="id" column="empid" />
+		</collection>
+	</resultMap> -->
+	
+	<!-- 查询奖扣任务 关联人员列表 -->
+	<!-- <select id="getTaskEmployeeListByCompany" parameterType="java.lang.String" resultMap="awardCutTaskSysEmployeeResult">
+		select  b.employee_id as empid,<include refid="intNewAwardCutTaskColumns"/>
+		from int_new_award_cut_task a
+		inner join int_new_award_cut_task_employee b on a.id = b.award_cut_task_id
+		where a.company_id = #{companyId}
+	</select> -->
+	
+	
+	<!-- 获取人员 信息获取任务信息 -->
+	<!-- <select id="getTaskByEmp" parameterType="java.lang.String" resultMap="awardCutTaskSysEmployeeResult">
+		select  b.employee_id as empid,<include refid="intNewAwardCutTaskColumns"/>
+		from int_new_award_cut_task a
+		inner join int_new_award_cut_task_employee b on a.id = b.award_cut_task_id
+		where b.employee_id = #{employeeId}
+	</select> -->
+	
+	<!-- 清理公司当月已结算数据 -->
+	<!-- <delete id="deleteMonthTaskByEmp" parameterType="ACTaskPO">
+		delete from int_new_award_cut_task_detail_score where date_format(kh_time, '%Y-%m') = date_format(#{khTime}, '%Y-%m') and employee_id = #{employeeId}
+	</delete>
+	
+	<select id="checkname" parameterType="java.lang.String" resultType="java.lang.Integer">
+		select count(0) from es_member where uname=#{name}
+	</select> -->
+	
+	<!-- 批量插入 -->
+	<!-- <insert id="batchInsert">
+		INSERT INTO int_new_award_cut_task_detail_score(
+			id,
+			award_cut_task_id,
+			award_cut_task_name,
+			employee_id,
+			kh_time,
+			cycle,
+			cut_scale,
+			kh_type,
+			task_target,
+			task_awardTarget,
+			task_cutTarget,
+			completed_target,
+			completed_awardTarget,
+			completed_cutTarget,
+			award_deduct_score,
+			cut_deduct_score,
+			ont_point_deduct_score,
+			section_sort,
+			company_id,
+			create_by,
+			create_date,
+			update_by,
+			update_date,
+			del_flag,
+			award_bscore,
+			cut_bscore,
+			award_cut_cycle,
+			award_cut_one_point,
+			uncompleted_one_point,
+			one_point_cycle			
+		) VALUES 
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(
+				#{item.id},
+				#{item.awardCutTaskId},
+				#{item.awardCutTaskName},
+				#{item.employeeId},
+				#{item.khTime},
+				#{item.cycle},
+				#{item.cutScale},
+				#{item.khType},
+				#{item.taskTarget},
+				#{item.taskAwardTarget},
+				#{item.taskCutTarget},
+				#{item.completedTarget},
+				#{item.completedAwardTarget},
+				#{item.completedCutTarget},
+				#{item.awardDeductScore},
+				#{item.cutDeductScore},
+				#{item.ontPointDeductScore},
+				#{item.sectionSort},
+				#{item.companyId},
+				#{item.createBy},
+				#{item.createDate},
+				#{item.updateBy},
+				#{item.updateDate},
+				'0',
+				#{item.awardBscore},
+				#{item.cutBscore},
+				#{item.awardCutCycle},
+				#{item.awardCutOnePoint},
+				#{item.uncompletedOnePoint},
+				#{item.onePointCycle}			
+			)
+		</foreach>
+	</insert> -->
+</mapper>
